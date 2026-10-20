@@ -1,0 +1,7 @@
+pub const SCREEN_WIDTH = 1024/2;
+pub const SCREEN_HEIGHT = 768/2;
+
+pub const CARD_WIDTH = SCREEN_WIDTH / 10;
+pub const CARD_HEIGHT = CARD_WIDTH * 1.3;
+pub const STACK_CARD_GAP = CARD_HEIGHT / 5.0;
+

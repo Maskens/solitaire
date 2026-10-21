@@ -27,7 +27,7 @@ pub fn main(_: std.process.Init) !void {
 
     while(!rl.windowShouldClose()) {
         const mousePos = rl.getMousePosition();
-        // State machine
+
         state: switch (state) {
             .nop => {
                 if(rl.isMouseButtonPressed(.left)) {
@@ -54,12 +54,10 @@ pub fn main(_: std.process.Init) !void {
             .dropCards => {
                 cardsDragged.position = .{ .x = 0, .y = 0 };
 
-                // Put back the cards into "stack"
-                // Todo: Instead of putting back to source stack put them back to a new stack if so
-                // Need to calculate which stack is nearest!
+                const targetStack = game.getNearestStack(mousePos);
                 while (cardsDragged.items_array.items.len > 0) {
                     const card = cardsDragged.items_array.swapRemove(0);
-                    try stackSource.addCard(card.id);
+                    try targetStack.addCard(card.id);
                 }
                 
                 state = .nop;

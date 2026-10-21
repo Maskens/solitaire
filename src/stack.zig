@@ -89,6 +89,18 @@ pub const Stack = struct {
     }
 
     pub fn draw(self: *const Stack) void {
+
+        rl.drawRectangleLinesEx(
+            .{
+                .x = self.position.x,
+                .y = self.position.y,
+                .width = c.CARD_WIDTH,
+                .height = c.CARD_HEIGHT
+            }, 
+            2.0,
+            .white
+        );
+
         for(self.items_array.items, 0..) |*card, i| {
             const rect = card.getPosRect(self.position, i);
 

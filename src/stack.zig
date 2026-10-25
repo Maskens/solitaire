@@ -2,8 +2,19 @@ const rl = @import("raylib");
 const c = @import("common.zig");
 const std = @import("std");
 
+pub const CardType = enum {
+    spades,
+    diamonds,
+    clubs,
+    hearts
+};
+
 pub const Card = struct {
     id: i32,
+    spriteSheetOffset: rl.Rectangle, // Where on the sprite sheet we draw this card
+    type: CardType,
+    value: i32,
+    hidden: bool,
 
     fn getPosRect(_: *Card, position: rl.Vector2, i: usize) rl.Rectangle {
         const _i = @as(f32, @floatFromInt(i));
@@ -33,10 +44,7 @@ pub const Stack = struct {
         return stack;
     }
 
-    pub fn addCard(self: *Stack, id: i32) !void {
-        const card = Card {
-            .id = id
-        };
+    pub fn addCard(self: *Stack, card: Card) !void {
         try self.items_array.appendBounded(card);
     }
 
@@ -83,13 +91,12 @@ pub const Stack = struct {
         }
 
         for(tempList.items) |item| {
-            try targetStack.addCard(item.id);
+            try targetStack.addCard(item);
         }
         return collisionDelta;
     }
 
-    pub fn draw(self: *const Stack) void {
-
+    pub fn draw(self: *const Stack, spriteSheet: *rl.Texture2D) void {
         rl.drawRectangleLinesEx(
             .{
                 .x = self.position.x,
@@ -104,7 +111,15 @@ pub const Stack = struct {
         for(self.items_array.items, 0..) |*card, i| {
             const rect = card.getPosRect(self.position, i);
 
-            rl.drawRectangleRec(rect, .brown);
+            rl.drawTexturePro(
+                spriteSheet.*, 
+                card.spriteSheetOffset, 
+                rect, 
+                .{.x = 0, .y = 0}, 
+                0.0, 
+                .white
+            );
+            // rl.drawRectangleRec(rect, .brown);
             rl.drawRectangleLinesEx(
                 rect,
                 2.0, 

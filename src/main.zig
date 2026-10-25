@@ -12,18 +12,18 @@ const State = enum {
 };
 
 pub fn main(_: std.process.Init) !void {
+    rl.initWindow(c.SCREEN_WIDTH, c.SCREEN_HEIGHT, "Patience");
+    defer rl.closeWindow();
+
+    rl.setTargetFPS(60);
 
     var game = try Game.init();
+    defer game.deinit();
 
     var state = State.nop;
     var cardsDragged = Stack.init(0, .{ .x = 0, .y = 0 });
     var deltaPos: rl.Vector2 = .{ .x = 0, .y = 0 };
     var stackSource: *Stack = undefined;
-
-    rl.initWindow(c.SCREEN_WIDTH, c.SCREEN_HEIGHT, "Patience");
-    defer rl.closeWindow();
-
-    rl.setTargetFPS(60);
 
     while(!rl.windowShouldClose()) {
         const mousePos = rl.getMousePosition();
@@ -57,7 +57,7 @@ pub fn main(_: std.process.Init) !void {
                 const targetStack = game.getNearestStack(mousePos);
                 while (cardsDragged.items_array.items.len > 0) {
                     const card = cardsDragged.items_array.swapRemove(0);
-                    try targetStack.addCard(card.id);
+                    try targetStack.addCard(card);
                 }
                 
                 state = .nop;
@@ -70,7 +70,7 @@ pub fn main(_: std.process.Init) !void {
         game.draw();
 
         if (cardsDragged.items_array.items.len > 0) {
-            cardsDragged.draw();
+            cardsDragged.draw(&game.cardSpriteSheet);
         }
 
         rl.endDrawing();

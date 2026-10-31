@@ -1,9 +1,12 @@
-pub const SCREEN_WIDTH = 1024/2;
-pub const SCREEN_HEIGHT = 768/2;
+pub const SCREEN_WIDTH = 1024;
+pub const SCREEN_HEIGHT = 768;
 
 pub const CARD_WIDTH = SCREEN_WIDTH / 10;
 pub const CARD_HEIGHT = CARD_WIDTH * 1.3;
 pub const STACK_CARD_GAP = CARD_HEIGHT / 5.0;
+
+pub const STACK_GAP = SCREEN_WIDTH / 8;
+pub const STACK_ROW_Y = SCREEN_HEIGHT / 3;
 
 pub const SPRITE_SHEET_CARD_WIDTH: f32 = 560.0;
 pub const SPRITE_SHEET_CARD_HEIGHT: f32 = 780.0;

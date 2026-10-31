@@ -59,7 +59,7 @@ pub fn main(_: std.process.Init) !void {
                     const card = cardsDragged.items_array.swapRemove(0);
                     try targetStack.addCard(card);
                 }
-                
+
                 state = .nop;
             }
         }
@@ -70,7 +70,7 @@ pub fn main(_: std.process.Init) !void {
         game.draw();
 
         if (cardsDragged.items_array.items.len > 0) {
-            cardsDragged.draw(&game.cardSpriteSheet);
+            cardsDragged.draw(game.cardSpriteSheet);
         }
 
         rl.endDrawing();

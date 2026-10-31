@@ -16,7 +16,7 @@ pub const Card = struct {
     value: i32,
     hidden: bool,
 
-    fn getPosRect(_: *Card, position: rl.Vector2, i: usize) rl.Rectangle {
+    pub fn getPosRect(_: *Card, position: rl.Vector2, i: usize) rl.Rectangle {
         const _i = @as(f32, @floatFromInt(i));
         return .{
             .x = position.x,
@@ -30,16 +30,17 @@ pub const Card = struct {
 pub const Stack = struct {
     id: u8,
     position: rl.Vector2,
+    buf: [25]Card = undefined,
     items_array: std.ArrayList(Card) = undefined,
 
+    // Needs to be inline because of &stack.buf
     pub inline fn init(id: u8, position: rl.Vector2) Stack {
-        var buf: [25]Card = undefined;
         var stack = Stack {
             .id = id,
             .position = position,
         };
 
-        stack.items_array = std.ArrayList(Card).initBuffer(&buf);
+        stack.items_array = std.ArrayList(Card).initBuffer(&stack.buf);
 
         return stack;
     }
@@ -96,7 +97,7 @@ pub const Stack = struct {
         return collisionDelta;
     }
 
-    pub fn draw(self: *const Stack, spriteSheet: *rl.Texture2D) void {
+    pub fn draw(self: *const Stack, spriteSheet: rl.Texture2D) void {
         rl.drawRectangleLinesEx(
             .{
                 .x = self.position.x,
@@ -112,18 +113,17 @@ pub const Stack = struct {
             const rect = card.getPosRect(self.position, i);
 
             rl.drawTexturePro(
-                spriteSheet.*, 
+                spriteSheet, 
                 card.spriteSheetOffset, 
                 rect, 
                 .{.x = 0, .y = 0}, 
                 0.0, 
                 .white
             );
-            // rl.drawRectangleRec(rect, .brown);
             rl.drawRectangleLinesEx(
                 rect,
-                2.0, 
-                .white
+                0.5, 
+                .black
             );
         }
     }

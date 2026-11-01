@@ -1,10 +1,8 @@
 Solitaire clone written in zig
 
 Todo
-- Rewrite to allocators?
 
 Game
-
 - Get nearest valid stack
     - Returns optional *Stack
         - if no valid stack

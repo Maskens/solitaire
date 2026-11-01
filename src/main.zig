@@ -59,12 +59,33 @@ pub fn main(init: std.process.Init) !void {
             .dropCards => {
                 cardsDragged.position = .{ .x = 0, .y = 0 };
 
-                const targetStack = game.getNearestStack(mousePos);
-                while (cardsDragged.items_array.items.len > 0) {
-                    const card = cardsDragged.items_array.swapRemove(0);
-                    try targetStack.items_array.append(arenaAlloc, card);
-                }
+                var targetStackMaybe = try game.getNearestMatchingStack(arenaAlloc, mousePos, &cardsDragged);
 
+                // Rewrite this mess
+                if (targetStackMaybe == null) {
+                    // Move dragged stack back to original stack
+                    while (cardsDragged.items_array.items.len > 0) {
+                        const card = cardsDragged.items_array.swapRemove(0);
+                        try stackSource.items_array.append(arenaAlloc, card);
+                    }
+
+                } else {
+                    if (stackSource.getDistance(mousePos) < targetStackMaybe.?.getDistance(mousePos)) {
+
+                        // Move dragged stack back to original stack
+                        while (cardsDragged.items_array.items.len > 0) {
+                            const card = cardsDragged.items_array.swapRemove(0);
+                            try stackSource.items_array.append(arenaAlloc, card);
+                        }
+                    } else {
+                        // Write a function to move cards to another stack
+                        while (cardsDragged.items_array.items.len > 0) {
+                            const card = cardsDragged.items_array.swapRemove(0);
+                            try targetStackMaybe.?.items_array.append(arenaAlloc, card);
+                        }
+                    }
+
+                }
                 state = .nop;
             }
         }

@@ -4,11 +4,12 @@ const Stack = @import("stack.zig").Stack;
 const Card = @import("stack.zig").Card;
 const loader = @import("loader.zig");
 const c = @import("common.zig");
+const Allocator = std.mem.Allocator;
 
 pub const Game = struct {
     stacks: [7]Stack = undefined,
     cardSpriteSheet: rl.Texture2D,
-    pub fn init(alloc: std.mem.Allocator) !Game {
+    pub fn init(alloc: Allocator) !Game {
         const cards_texture = try rl.loadTexture("resources/classic_13x4x560x780.png");
         rl.setTextureFilter(cards_texture, rl.TextureFilter.bilinear);
 
@@ -61,11 +62,27 @@ pub const Game = struct {
         return null;
     }
 
-    pub fn getNearestStack(self: *Game, point: rl.Vector2) *Stack {
+    pub fn getNearestMatchingStack(self: *Game, alloc: Allocator, point: rl.Vector2, draggedStack: *Stack) !?*Stack {
         var nearestStack: ?*Stack = null;
         var currentDistanceX: ?f32 = null;
+
+        // Get all stacks that matches the dragged stack
+        const topDraggedCard = draggedStack.items_array.items[0];
+        var matchingStacks = try std.ArrayList(*Stack).initCapacity(alloc, 10);
+        defer matchingStacks.deinit(alloc);
+
+        for (&self.stacks) |*stack| {
+            const lastCard = stack.items_array.getLastOrNull();
+
+            if (lastCard) |card| {
+                if (isCardMatching(&topDraggedCard, &card)) {
+                    try matchingStacks.append(alloc, stack);
+                }
+            }
+        }
+
         // Get the nearest stack of mouse cursor horizontally
-        for(&self.stacks) |*stack| {
+        for(matchingStacks.items) |stack| {
             const stackMiddleX = stack.position.x + c.CARD_WIDTH / 2;
             const deltaX = @abs(stackMiddleX - point.x);
 
@@ -80,7 +97,19 @@ pub const Game = struct {
             }
         }
 
-        return nearestStack.?;
+        return nearestStack;
+    }
+
+    fn isCardMatching(cardToMatch: *const Card, matchingCard: *const Card) bool {
+        if (cardToMatch.getCardColor() == matchingCard.getCardColor()) {
+            return false;
+        }
+
+        if ((cardToMatch.value + 1) == matchingCard.value) {
+            return true;
+        }
+
+        return false;
     }
 
     pub fn draw(self: *Game) void {

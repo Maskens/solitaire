@@ -10,6 +10,11 @@ pub const CardType = enum {
     hearts
 };
 
+pub const CardColor = enum {
+    red,
+    black
+};
+
 pub const Card = struct {
     id: i32,
     spriteSheetOffset: rl.Rectangle, // Where on the sprite sheet we draw this card
@@ -24,6 +29,13 @@ pub const Card = struct {
             .y = position.y + c.STACK_CARD_GAP * _i,
             .width = c.CARD_WIDTH,
             .height = c.CARD_HEIGHT
+        };
+    }
+
+    pub fn getCardColor(self: *const Card) CardColor {
+        return switch (self.type) {
+            .spades, .clubs => .black,
+            .diamonds, .hearts => .red
         };
     }
 };
@@ -128,6 +140,11 @@ pub const Stack = struct {
             .width = c.CARD_WIDTH,
             .height = height
         };
+    }
+
+    pub fn getDistance(self: *Stack, mousePos: rl.Vector2) f32 {
+        const middleX = self.position.x + c.CARD_WIDTH / 2;
+        return @abs(middleX - mousePos.x);
     }
 };
 

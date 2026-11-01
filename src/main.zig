@@ -33,6 +33,8 @@ pub fn main(init: std.process.Init) !void {
             .nop => {
                 if(rl.isMouseButtonPressed(.left)) {
                     stackSource = game.getStackClicked(mousePos) orelse break :state;
+                    // Check card clicked
+                    stackSource.swapCard(mousePos);
 
                     rl.traceLog(.info, "%d", .{stackSource.id});
                     const posDelta = try stackSource.getCardStackClicked(

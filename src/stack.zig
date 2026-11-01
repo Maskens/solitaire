@@ -20,7 +20,7 @@ pub const Card = struct {
     spriteSheetOffset: rl.Rectangle, // Where on the sprite sheet we draw this card
     type: CardType,
     value: i32,
-    hidden: bool,
+    hidden: bool = true,
 
     pub fn getPosRect(_: *Card, position: rl.Vector2, i: usize) rl.Rectangle {
         const _i = @as(f32, @floatFromInt(i));
@@ -53,6 +53,40 @@ pub const Stack = struct {
         };
     }
 
+    pub fn swapCard(self: *Stack, point: rl.Vector2) void {
+        var cardMaybe = self.getCardClicked(point);
+        if (cardMaybe) |*card| {
+            if(card.@"1" == self.items_array.items.len-1) {
+                rl.traceLog(.info, "Card id clicked: %d", .{card.@"0".id});
+
+                card.@"0".hidden = false;
+            }
+        }
+    }
+
+    pub fn getCardClicked(self: *Stack, point: rl.Vector2) ?struct { *Card, usize } {
+        if (self.items_array.items.len == 0) { //SHould this guard be here or at call site?
+            return null;
+        }
+
+        var i = self.items_array.items.len - 1;
+        while (i >= 0) {
+            const card = &self.items_array.items[i];
+            if (rl.checkCollisionPointRec(point, card.getPosRect(self.position, i))) {
+                rl.traceLog(.info, "Card id clicked: %d", .{card.id});
+                return .{ card, i};
+            }
+
+            if (i == 0) {
+                break;
+            }
+
+            i -= 1;
+        }
+
+        return null;
+    }
+
     // Gets a card if its in the stack, returns delta pos of card
     pub fn getCardStackClicked(self: *Stack, alloc: Allocator, point: rl.Vector2, targetStack: *Stack) !?rl.Vector2 {
         if (self.items_array.items.len == 0) { //SHould this guard be here or at call site?
@@ -68,6 +102,11 @@ pub const Stack = struct {
 
             if (rl.checkCollisionPointRec(point, card.getPosRect(self.position, i))) {
                 // rl.traceLog(.info, "Card id clicked: %d", .{card.id });
+                if (card.hidden) {
+                    break;
+                }
+
+                // We got a hit
                 collisionDelta = .{
                     .x = point.x - card.getPosRect(self.position, i).x,
                     .y = point.y - card.getPosRect(self.position, i).y
@@ -115,6 +154,12 @@ pub const Stack = struct {
 
         for(self.items_array.items, 0..) |*card, i| {
             const rect = card.getPosRect(self.position, i);
+
+            if (card.hidden) {
+                rl.drawRectangleRec(rect, .brown);
+                rl.drawRectangleLinesEx(rect, 2.0, .white);
+                continue;
+            }
 
             rl.drawTexturePro(
                 spriteSheet, 

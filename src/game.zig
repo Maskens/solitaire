@@ -8,7 +8,7 @@ const c = @import("common.zig");
 pub const Game = struct {
     stacks: [7]Stack = undefined,
     cardSpriteSheet: rl.Texture2D,
-    pub inline fn init() !Game {
+    pub fn init(alloc: std.mem.Allocator) !Game {
         const cards_texture = try rl.loadTexture("resources/classic_13x4x560x780.png");
         rl.setTextureFilter(cards_texture, rl.TextureFilter.bilinear);
 
@@ -30,12 +30,12 @@ pub const Game = struct {
         var numberOfCardsToAdd: usize = 1;
         var currentCard: usize = 0;
 
-        inline for (0..game.stacks.len) |i| {
+        for (0..game.stacks.len) |i| {
             const _i = @as(u8, @intCast(i));
-            var newStack = Stack.init(_i + 1, .{ .x = startX * _i + offsetX * _i, .y = startY});
+            var newStack = try Stack.init(alloc, _i + 1, .{ .x = startX * _i + offsetX * _i, .y = startY});
 
             for (0..numberOfCardsToAdd+1) |_| {
-                try newStack.addCard(allCards[currentCard]);
+                try newStack.items_array.append(alloc, allCards[currentCard]);
                 currentCard += 1;
             }
 

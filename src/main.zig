@@ -11,17 +11,18 @@ const State = enum {
     dropCards
 };
 
-pub fn main(_: std.process.Init) !void {
+pub fn main(init: std.process.Init) !void {
+    const arenaAlloc = init.arena.allocator();
     rl.initWindow(c.SCREEN_WIDTH, c.SCREEN_HEIGHT, "Patience");
     defer rl.closeWindow();
 
     rl.setTargetFPS(60);
 
-    var game = try Game.init();
+    var game = try Game.init(arenaAlloc);
     defer game.deinit();
 
     var state = State.nop;
-    var cardsDragged = Stack.init(0, .{ .x = 0, .y = 0 });
+    var cardsDragged = try Stack.init(arenaAlloc, 0, .{ .x = 0, .y = 0 });
     var deltaPos: rl.Vector2 = .{ .x = 0, .y = 0 };
     var stackSource: *Stack = undefined;
 
@@ -34,7 +35,11 @@ pub fn main(_: std.process.Init) !void {
                     stackSource = game.getStackClicked(mousePos) orelse break :state;
 
                     rl.traceLog(.info, "%d", .{stackSource.id});
-                    const posDelta = try stackSource.getCardStackClicked(mousePos, &cardsDragged);
+                    const posDelta = try stackSource.getCardStackClicked(
+                        arenaAlloc, 
+                        mousePos, 
+                        &cardsDragged
+                    );
 
                     if (cardsDragged.items_array.items.len > 0) { // We got a stack of cards to move!
                         deltaPos = posDelta.?; 
@@ -57,7 +62,7 @@ pub fn main(_: std.process.Init) !void {
                 const targetStack = game.getNearestStack(mousePos);
                 while (cardsDragged.items_array.items.len > 0) {
                     const card = cardsDragged.items_array.swapRemove(0);
-                    try targetStack.addCard(card);
+                    try targetStack.items_array.append(arenaAlloc, card);
                 }
 
                 state = .nop;

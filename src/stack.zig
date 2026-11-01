@@ -1,6 +1,7 @@
 const rl = @import("raylib");
 const c = @import("common.zig");
 const std = @import("std");
+const Allocator = std.mem.Allocator;
 
 pub const CardType = enum {
     spades,
@@ -30,27 +31,18 @@ pub const Card = struct {
 pub const Stack = struct {
     id: u8,
     position: rl.Vector2,
-    buf: [25]Card = undefined,
     items_array: std.ArrayList(Card) = undefined,
 
-    // Needs to be inline because of &stack.buf
-    pub inline fn init(id: u8, position: rl.Vector2) Stack {
-        var stack = Stack {
+    pub fn init(alloc: Allocator, id: u8, position: rl.Vector2) !Stack {
+        return Stack {
             .id = id,
             .position = position,
+            .items_array = try std.ArrayList(Card).initCapacity(alloc, 25)
         };
-
-        stack.items_array = std.ArrayList(Card).initBuffer(&stack.buf);
-
-        return stack;
-    }
-
-    pub fn addCard(self: *Stack, card: Card) !void {
-        try self.items_array.appendBounded(card);
     }
 
     // Gets a card if its in the stack, returns delta pos of card
-    pub fn getCardStackClicked(self: *Stack, point: rl.Vector2, targetStack: *Stack) !?rl.Vector2 {
+    pub fn getCardStackClicked(self: *Stack, alloc: Allocator, point: rl.Vector2, targetStack: *Stack) !?rl.Vector2 {
         if (self.items_array.items.len == 0) { //SHould this guard be here or at call site?
             return null;
         }
@@ -88,11 +80,11 @@ pub const Stack = struct {
 
         while(self.items_array.items.len > i) {
             const item = self.items_array.pop() orelse return null; 
-            try tempList.insertBounded(0, item);
+            try tempList.insert(alloc, 0, item);
         }
 
         for(tempList.items) |item| {
-            try targetStack.addCard(item);
+            try targetStack.items_array.append(alloc, item);
         }
         return collisionDelta;
     }

@@ -24,7 +24,7 @@ pub fn loadCards() [52]Card {
             },
             .type = getCardType(@as(i32, @trunc(y_index))),
             .value = @as(i32, @trunc(x_index + 1)),
-            .hidden = false,
+            .hidden = true,
         };
 
         cards[i] = card;

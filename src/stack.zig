@@ -20,7 +20,7 @@ pub const Card = struct {
     spriteSheetOffset: rl.Rectangle, // Where on the sprite sheet we draw this card
     type: CardType,
     value: i32,
-    hidden: bool,
+    hidden: bool = true,
 
     pub fn getPosRect(_: *Card, position: rl.Vector2, i: usize) rl.Rectangle {
         const _i = @as(f32, @floatFromInt(i));
@@ -115,6 +115,12 @@ pub const Stack = struct {
 
         for(self.items_array.items, 0..) |*card, i| {
             const rect = card.getPosRect(self.position, i);
+
+            if (card.hidden) {
+                rl.drawRectangleRec(rect, .brown);
+                rl.drawRectangleLinesEx(rect, 2.0, .white);
+                continue;
+            }
 
             rl.drawTexturePro(
                 spriteSheet, 

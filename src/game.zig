@@ -35,9 +35,13 @@ pub const Game = struct {
             const _i = @as(u8, @intCast(i));
             var newStack = try Stack.init(alloc, _i + 1, .{ .x = startX * _i + offsetX * _i, .y = startY});
 
-            for (0..numberOfCardsToAdd+1) |_| {
-                try newStack.items_array.append(alloc, allCards[currentCard]);
+            for (0..numberOfCardsToAdd+1) |j| {
+                var cardToAdd = allCards[currentCard];
                 currentCard += 1;
+                if (j == numberOfCardsToAdd) {
+                    cardToAdd.hidden = false;
+                }
+                try newStack.items_array.append(alloc, cardToAdd);
             }
 
             game.stacks[i] = newStack;

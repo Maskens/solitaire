@@ -2,12 +2,14 @@ const rl = @import("raylib");
 const std = @import("std");
 const Stack = @import("stack.zig").Stack;
 const Card = @import("stack.zig").Card;
+const Pile = @import("pile.zig").Pile;
 const loader = @import("loader.zig");
 const c = @import("common.zig");
 const Allocator = std.mem.Allocator;
 
 pub const Game = struct {
     stacks: [7]Stack = undefined,
+    piles: [4]Pile = undefined,
     cardSpriteSheet: rl.Texture2D,
     pub fn init(alloc: Allocator) !Game {
         const cards_texture = try rl.loadTexture("resources/classic_13x4x560x780.png");
@@ -20,8 +22,31 @@ pub const Game = struct {
 
         std.Random.shuffle(rand, Card, &allCards);
 
+        const pileStartX: f32 = c.SCREEN_WIDTH / 3;
         var game = Game {
-            .cardSpriteSheet = cards_texture
+            .cardSpriteSheet = cards_texture,
+            .piles = .{
+                Pile {
+                    .pos = rl.Vector2.init(pileStartX, 10),
+                    .cards = try std.ArrayList(Card).initCapacity(alloc, 20),
+                    .type = null
+                },
+                Pile {
+                    .pos = rl.Vector2.init(pileStartX + c.STACK_GAP, 10),
+                    .cards = try std.ArrayList(Card).initCapacity(alloc, 20),
+                    .type = null
+                },
+                Pile {
+                    .pos = rl.Vector2.init(pileStartX + c.STACK_GAP * 2, 10),
+                    .cards = try std.ArrayList(Card).initCapacity(alloc, 20),
+                    .type = null
+                },
+                Pile {
+                    .pos = rl.Vector2.init(pileStartX + c.STACK_GAP * 3, 10),
+                    .cards = try std.ArrayList(Card).initCapacity(alloc, 20),
+                    .type = null
+                }
+            }
         };
 
         const startX: f32 = 10;
@@ -119,6 +144,10 @@ pub const Game = struct {
     pub fn draw(self: *Game) void {
         for(self.stacks) |stack| {
             stack.draw(self.cardSpriteSheet);
+        }
+
+        for (&self.piles) |*pile| {
+            pile.draw(self.cardSpriteSheet);
         }
     }
 };

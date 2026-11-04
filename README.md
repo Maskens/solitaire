@@ -1,9 +1,8 @@
 Solitaire clone written in zig
 
 Todo
-- Implement hidden cards
-- Cant click and move hidden cards
-- Can reveal hidden cards if last on stack with a click
+- Implement the 4 stacks in top!
+    - Cards can be put there in incremental order starting with aces (value=1)
 
 
 Later
@@ -28,3 +27,7 @@ DONE
     - Alternate colors
     - Ascending numbers
     - Dont bother with hiding cards just yet
+- Implement hidden cards
+- Cant click and move hidden cards
+    - Add check when moving stacks
+- Can reveal hidden cards if last on stack with a click

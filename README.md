@@ -3,11 +3,12 @@ Solitaire clone written in zig
 Todo
 - Implement the 4 stacks in top!
     - Cards can be put there in incremental order starting with aces (value=1)
+- Detect if single card is moved and if its dropped near a top pile.
+    - The detection box should be kind of close so not dropped by misstake
 
 
 Later
 - Implement the draw pile
-- Add the 4 top stacks to put cards into
 
 DONE
 - Load card spreadsheet DONE

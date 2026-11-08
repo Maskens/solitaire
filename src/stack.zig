@@ -177,6 +177,34 @@ pub const Stack = struct {
         }
     }
 
+    pub fn canAddStack(self: *Stack, stack: *Stack) bool {
+        if(self.items_array.items.len == 0) {
+            return true;
+        }
+
+        const topCard = stack.items_array.getLastOrNull();
+
+        if (topCard) |card| {
+            if (Stack.isCardMatching(&card, &self.items_array.getLast())) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    fn isCardMatching(cardToMatch: *const Card, matchingCard: *const Card) bool {
+        if (cardToMatch.getCardColor() == matchingCard.getCardColor()) {
+            return false;
+        }
+
+        if ((cardToMatch.value + 1) != matchingCard.value) {
+            return false;
+        }
+
+        return true;
+    }
+
     pub fn getStackBoundsExact(self: *const Stack) rl.Rectangle {
         const height = @as(f32, @floatFromInt(self.items_array.items.len)) * c.STACK_CARD_GAP + c.CARD_HEIGHT - c.STACK_CARD_GAP;
         return .{
@@ -190,6 +218,10 @@ pub const Stack = struct {
     pub fn getDistance(self: *Stack, mousePos: rl.Vector2) f32 {
         const middleX = self.position.x + c.CARD_WIDTH / 2;
         return @abs(middleX - mousePos.x);
+    }
+
+    pub fn getSize(self: *Stack) usize {
+        return self.items_array.items.len;
     }
 };
 

@@ -61,10 +61,23 @@ pub fn main(init: std.process.Init) !void {
             .dropCards => {
                 cardsDragged.position = .{ .x = 0, .y = 0 };
 
+                // First check top piles
+                if (cardsDragged.getSize() == 1) {
+                    if(game.getNearPile(mousePos)) |pile| {
+                        if (pile.canAddCard(&cardsDragged.items_array.getLast())) {
+                            const card = cardsDragged.items_array.swapRemove(0);
+                            try pile.addCard(arenaAlloc, card);
+                            continue :state .nop;
+                        }
+                    }
+                }
+
+                // Check stack to drop the cards into
                 var targetStackMaybe = try game.getNearestMatchingStack(arenaAlloc, mousePos, &cardsDragged);
 
                 // Rewrite this mess
                 if (targetStackMaybe == null) {
+                    rl.traceLog(.info, "Moving back", .{});
                     // Move dragged stack back to original stack
                     while (cardsDragged.items_array.items.len > 0) {
                         const card = cardsDragged.items_array.swapRemove(0);
@@ -88,6 +101,7 @@ pub fn main(init: std.process.Init) !void {
                     }
 
                 }
+
                 state = .nop;
             }
         }

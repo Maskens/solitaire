@@ -91,22 +91,29 @@ pub const Game = struct {
         return null;
     }
 
+    // Returns a pile if its close enough to mouse ptr
+    pub fn getNearPile(self: *Game, point: rl.Vector2) ?*Pile {
+        for (&self.piles) |*pile| {
+            if (pile.isNear(point)) {
+                return pile;
+            }
+        }
+
+        return null;
+    } 
+
     pub fn getNearestMatchingStack(self: *Game, alloc: Allocator, point: rl.Vector2, draggedStack: *Stack) !?*Stack {
         var nearestStack: ?*Stack = null;
         var currentDistanceX: ?f32 = null;
 
         // Get all stacks that matches the dragged stack
-        const topDraggedCard = draggedStack.items_array.items[0];
         var matchingStacks = try std.ArrayList(*Stack).initCapacity(alloc, 10);
         defer matchingStacks.deinit(alloc);
 
         for (&self.stacks) |*stack| {
-            const lastCard = stack.items_array.getLastOrNull();
-
-            if (lastCard) |card| {
-                if (isCardMatching(&topDraggedCard, &card)) {
-                    try matchingStacks.append(alloc, stack);
-                }
+            if(stack.canAddStack(draggedStack)) {
+                try matchingStacks.append(alloc, stack);
+                rl.traceLog(.info, "Moving back", .{});
             }
         }
 
@@ -127,18 +134,6 @@ pub const Game = struct {
         }
 
         return nearestStack;
-    }
-
-    fn isCardMatching(cardToMatch: *const Card, matchingCard: *const Card) bool {
-        if (cardToMatch.getCardColor() == matchingCard.getCardColor()) {
-            return false;
-        }
-
-        if ((cardToMatch.value + 1) == matchingCard.value) {
-            return true;
-        }
-
-        return false;
     }
 
     pub fn draw(self: *Game) void {
